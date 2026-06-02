@@ -13,7 +13,11 @@ class View(ft.UserControl):
         self._controller = None
         # graphical elements
         self._title = None
+        self._txtAnno = None
+        self._btnCalcola = None
 
+        self.txtPaese = None
+        self._btnRaggiungibili=None
         self._txt_result = None
 
     def load_interface(self):
@@ -22,10 +26,21 @@ class View(ft.UserControl):
         self._page.controls.append(self._title)
 
         #ROW with controls
-        self._txtAnno = ft.TextField(label="Anno")
-        self._btnCalcola = ft.ElevatedButton(text="Calcola Confini", on_click=self._controller.handleCalcola)
+        self._txtAnno = ft.TextField(label="Anno",width=300)
+        self._btnCalcola = ft.ElevatedButton(text="Calcola Confini",width=200, on_click=self._controller.handleCalcola)
         row1 = ft.Row([self._txtAnno, self._btnCalcola], alignment=ft.MainAxisAlignment.CENTER)
         self._page.controls.append(row1)
+
+        self.txtPaese = ft.Dropdown(
+            label="Stato",
+            width=300,
+            hint_text="Stato",
+            options=[],
+        )
+        self._btnRaggiungibili = ft.ElevatedButton(text="Stati raggiungibili",width=200, on_click=self._controller.handleRaggiungibili)
+        row2 = ft.Row([self.txtPaese,self._btnRaggiungibili], alignment=ft.MainAxisAlignment.CENTER)
+        self._page.controls.append(row2)
+
         # List View where the reply is printed
         self._txt_result = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=False)
         self._page.controls.append(self._txt_result)
@@ -49,4 +64,11 @@ class View(ft.UserControl):
         self._page.update()
 
     def update_page(self):
+        self._page.update()
+
+    def set_campi(self,stati):
+        self.txtPaese.options = []
+        for i in stati:
+            self.txtPaese.options.append(ft.dropdown.Option(key=i,text=i))
+
         self._page.update()
