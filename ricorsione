@@ -1,0 +1,752 @@
+###################################################################################
+Metodo per trovare il cammino massimo dando in input solo il nodo di partenza
+Vincoli: - Ogni arco affinchè venga inserito deve avere u peso maggiore di quello
+          inserito precedentemente
+####################################################################################
+   def getPesoArco(self, u, v):
+       return self._grafo[u][v]["weight"]
+
+
+   def score(self, parziale):
+       score = 0
+       for i in range (len(parziale) -1):
+           score += self._grafo[parziale[i]][parziale[i+1]]["weight"]
+       return score
+
+
+   def getPath(self, v0):
+       #Inizializzo le variabili generiche
+       parziale = [v0]
+       self._bestPath = []
+       self._costoCammino = -1
+
+
+       #Esploriamo i vicini del nodo di partenza v0
+       #Con grafo diretto --> successors()
+       #Con grafo non diretto --> neighbors
+       for v in self._grafo.successors(v0):
+           parziale.append(v)
+           #Avvio la ricorsione
+           self.ricorsione(parziale)
+           #Effettuo il meccanismo di backtracking: rimuoviamo il vicino per trovare le altre strade del ciclo
+           parziale.pop()
+       return self._bestPath , self._costoCammino
+
+
+   def ricorsione(self, parziale):
+       #Verifico se la soluzione parziale è meglio del BestCase utilizzando la funzione score
+       punteggio_attuale = self.score(parziale)
+       if punteggio_attuale > self._costoCammino:
+           self._bestPath = copy.deepcopy(parziale)
+           self._costoCammino = punteggio_attuale
+
+
+       #Verifico quindi se ha senso continuare ad andare avanti con la ricerca di un cammino ottimale - Nel caso ci
+       #fossero vincoli di terminazione
+
+
+       #Effettuo quindi il mio meccanismo di ricorsione per lavorare sul nodo successivo
+       nodo_corrente = parziale[-1]
+       #Recupero i vicini dell'ultimo modo inserito all'interno della mia lista parziale
+       for v in self._grafo.successors(nodo_corrente):
+           if v not in parziale:
+               #verifico che il peso del potenziale arco che andremo ad aggiungere sia maggiore del precedente
+               pesoE = self._grafo[nodo_corrente][v]["weight"]
+               nodo_precedente = parziale[-2]
+               pesoP = self._grafo[nodo_precedente][nodo_corrente]["weight"]
+               if pesoE>pesoP:
+                   parziale.append(v)
+                   self.ricorsione(parziale)
+                   parziale.pop()
+
+
+###################################################################################
+Metodo che permettere ricercare un cammino che permetta di massimizzare la somma dei
+pesi degli archi tra un nodo sorgente ed un nodo di destinazione, rispettando il vincolo
+del numero massimo di archi che si possono percorrere. (FlightDelays)
+####################################################################################
+def getPesoArco(self, u, v):
+   """Restituisce il peso dell'arco tra u e v."""
+   return self._grafo[u][v]["weight"]
+
+
+def score(self, parziale):
+   """ Calcola il punteggio di un cammino parziale.
+       Il punteggio è dato dalla somma dei pesi degli archi
+       attraversati dal percorso. """
+   score = 0
+   for i in range(len(parziale) - 1):
+       u = parziale[i]
+       v = parziale[i + 1]
+       score += self.getPesoArco(u, v)
+   return score+
+
+
+def getPath(self, a1, a2, t):
+   """ Cerca il miglior percorso che massimizza la somma dei pesi
+   degli archi attraversati, da a1 ad a2 usando al massimo t archi.
+       Parametri:
+       - a1: artista di partenza
+       - a2: artista di destinazione
+       - t: numero massimo di archi percorribili
+       Ritorna:
+       - self._bestPath: percorso migliore trovato
+       - self._costoCammino: peso totale del percorso migliore"""
+   # Controllo che i nodi esistano nel grafo
+   if a1 not in self._grafo.nodes:
+       return [], -1
+   if a2 not in self._grafo.nodes:
+       return [], -1
+# Controllo che il numero massimo di archi sia valido
+   if t <= 0:
+       return [], -1
+# Inizializzo le variabili per la ricorsione
+   parziale = [a1]
+   self._bestPath = []
+   self._costoCammino = -1
+   self._destinazione = a2
+   self._maxArchi = t
+
+
+#Controllo che i nodi inseriti  non siano uguali
+   if a1 == a2:
+       self._bestPath = [a1]
+       self._costoCammino = 0
+       return self._bestPath, self._costoCammino
+
+
+#Controllo che se i nodi sono diversi il numero di tratte sia uguale a 0
+   if t == 0:
+       return [], -1
+
+
+#Inizio il meccanismo di ricorsione / backtracking per verificare se posso aggiungere gli archi
+   # Esploro solo i successori del nodo sorgente,
+   # cioè i nodi raggiungibili tramite archi uscenti da a1.
+   for v in self._grafo.successors(a1):
+       if v not in parziale:
+           parziale.append(v)
+           # Avvio la ricorsione dal cammino [a1, v].
+           self.ricorsione(parziale)
+           # Backtracking.
+           parziale.pop()
+   return self._bestPath, self._costoCammino
+
+
+
+
+def ricorsione(self, parziale):
+   """Metodo ricorsivo per cercare il percorso da a1 ad a2
+   che massimizza la somma dei pesi degli archi attraversati,
+   usando al massimo self._maxArchi archi.
+   Il grafo è orientato, quindi vengono esplorati solo i successori
+   del nodo corrente.
+   """
+
+
+   # Recupero l'ultimo nodo inserito nel percorso parziale
+   nodo_corrente = parziale[-1]
+
+
+   # Calcolo quanti archi sono stati già usati.
+   # Se il percorso contiene n nodi, allora contiene n-1 archi.
+   archi_usati = len(parziale) - 1
+
+
+   # Caso base 1:
+   # se il nodo corrente è la destinazione, ho trovato un percorso valido.
+   if nodo_corrente == self._destinazione:
+       punteggio_attuale = self.score(parziale)
+
+
+       # Se il percorso trovato è migliore del migliore salvato finora,
+       # aggiorno bestPath e costoCammino.
+       if punteggio_attuale > self._costoCammino:
+           self._bestPath = copy.deepcopy(parziale)
+           self._costoCammino = punteggio_attuale
+       # Mi fermo: non proseguo oltre la destinazione.
+       return
+
+
+   # Caso base 2:
+   # se ho già raggiunto il numero massimo di archi disponibili,
+   # non posso più continuare la ricerca.
+   if archi_usati == self._maxArchi:
+       return
+
+
+   # Esploro i successori del nodo corrente.
+   # In un grafo orientato si possono percorrere solo gli archi uscenti.
+   for v in self._grafo.successors(nodo_corrente):
+       # Evito cicli: non inserisco nel percorso un nodo già visitato.
+       if v not in parziale:
+           # Aggiungo il successore al percorso parziale.
+           parziale.append(v)
+
+
+           # Richiamo ricorsivamente la funzione sul nuovo percorso.
+           self.ricorsione(parziale)
+
+
+           # Backtracking:
+           # rimuovo l'ultimo nodo per provare altri successori.
+           parziale.pop()
+
+
+###################################################################################
+Metodo che permettere ricercare un cammino che permetta di massimizzare la somma dei
+pesi degli archi tra un nodo sorgente ed un nodo di destinazione, rispettando il vincolo
+del numero massimo relativo al peso degli archi.
+####################################################################################
+def getPesoArco(self, u, v):
+   """Restituisce il peso dell'arco tra u e v."""
+   return self._grafo[u][v]["weight"]
+
+
+def score(self, parziale):
+   """ Calcola il punteggio di un cammino parziale.
+       Il punteggio è dato dalla somma dei pesi degli archi
+       attraversati dal percorso. """
+   score = 0
+   for i in range(len(parziale) - 1):
+       u = parziale[i]
+       v = parziale[i + 1]
+       score += self.getPesoArco(u, v)
+   return score+
+
+
+def getPath(self, a1, a2, pesoMassimo):
+   """ Cerca il miglior percorso che massimizza la somma dei pesi
+   degli archi attraversati, da a1 ad a2 usando al massimo t archi.
+       Parametri:
+       - a1: artista di partenza
+       - a2: artista di destinazione
+       - pesoMassimo: peso massimo degli archi percorribili
+       Ritorna:
+       - self._bestPath: percorso migliore trovato
+       - self._costoCammino: peso totale del percorso migliore"""
+   # Controllo che i nodi esistano nel grafo
+   if a1 not in self._grafo.nodes:
+       return [], -1
+   if a2 not in self._grafo.nodes:
+       return [], -1
+# Controllo che il numero massimo di archi sia valido
+   if t <= 0:
+       return [], -1
+# Inizializzo le variabili per la ricorsione
+   parziale = [a1]
+   self._bestPath = []
+   self._costoCammino = -1
+   self._destinazione = a2
+   self._pesoMassimo = pesoMassimo
+
+
+#Controllo che i nodi inseriti  non siano uguali
+   if a1 == a2:
+       self._bestPath = [a1]
+       self._costoCammino = 0
+       return self._bestPath, self._costoCammino
+
+
+#Controllo che se i nodi sono diversi il pesoMassimo consentito non sia = 0
+   if self._pesoMassimo == 0:
+       return [], -1
+
+
+#Inizio il meccanismo di ricorsione / backtracking per verificare se posso aggiungere gli archi
+   # Esploro solo i successori del nodo sorgente,
+   # cioè i nodi raggiungibili tramite archi uscenti da a1.
+   for v in self._grafo.successors(a1):
+       if v not in parziale:
+           peso_arco = self.getPesoArco(a1, v)
+           # Aggiungo il primo arco solo se non supera il peso massimo
+           if peso_arco <= self._pesoMassimo:
+               parziale.append(v)
+               # Avvio la ricorsione dal cammino [a1, v].
+               self.ricorsione(parziale)
+               # Backtracking.
+               parziale.pop()
+   return self._bestPath, self._costoCammino
+
+
+
+
+def ricorsione(self, parziale):
+   """Metodo ricorsivo per cercare il percorso da a1 ad a2
+   che massimizza la somma dei pesi degli archi attraversati,
+   usando al massimo self._maxArchi archi.
+   Il grafo è orientato, quindi vengono esplorati solo i successori
+   del nodo corrente.
+   """
+
+
+   # Recupero l'ultimo nodo inserito nel percorso parziale
+   nodo_corrente = parziale[-1]
+
+
+    # Calcolo il peso attuale del percorso
+   peso_attuale = self.score(parziale)
+
+
+   # Caso base 1:
+   # se il peso del percorso supera il limite, interrompo la ricerca
+   if peso_attuale > self._pesoMassimo:
+       return
+
+
+   # Caso base 2:
+   # se il nodo corrente è la destinazione, verifico che il percorso sia valido.
+   if nodo_corrente == self._destinazione:
+       if peso_attuale > self._costoCammino:
+           self._bestPath = copy.deepcopy(parziale)
+           self._costoCammino = peso_attuale
+       # Mi fermo: non proseguo oltre la destinazione.
+       return
+
+
+   # Esploro i successori del nodo corrente.
+   # In un grafo orientato si possono percorrere solo gli archi uscenti.
+   for v in self._grafo.successors(nodo_corrente):
+       # Evito cicli: non inserisco nel percorso un nodo già visitato.
+       if v not in parziale:
+           # Aggiungo il successore al percorso parziale.
+           parziale.append(v)
+
+
+           # Richiamo ricorsivamente la funzione sul nuovo percorso.
+           self.ricorsione(parziale)
+
+
+           # Backtracking:
+           # rimuovo l'ultimo nodo per provare altri successori.
+           parziale.pop()
+
+
+###################################################################################
+Metodo che permettere ricercare un cammino che permetta di minimizzare la somma dei
+pesi degli archi tra un nodo sorgente ed un nodo di destinazione
+####################################################################################
+def getPesoArco(self, u, v):
+   """
+   Restituisce il peso dell'arco orientato u -> v.
+   """
+   return self._grafo[u][v]["weight"]
+
+
+def score(self, parziale):
+   """
+   Calcola il costo totale del cammino parziale.
+   Il costo è la somma dei pesi degli archi attraversati.
+   """
+   costo = 0
+   for i in range(len(parziale) - 1):
+       u = parziale[i]
+       v = parziale[i + 1]
+       costo += self.getPesoArco(u, v)
+
+
+   return costo
+
+
+def getPath(self, a1, a2):
+   """
+   Cerca il cammino da a1 ad a2 che minimizza la somma
+   dei pesi degli archi attraversati.
+   Ritorna:
+   - bestPath: cammino migliore trovato
+   - costoCammino: costo minimo del cammino
+   """
+
+
+   # Controllo che il nodo sorgente esista nel grafo
+   if a1 not in self._grafo.nodes:
+       return [], -1
+   # Controllo che il nodo destinazione esista nel grafo
+   if a2 not in self._grafo.nodes:
+       return [], -1
+   # Inizializzo le variabili della ricerca
+   parziale = [a1]
+   self._bestPath = []
+   self._costoCammino = math.inf
+   self._destinazione = a2
+
+
+   # Caso particolare: sorgente e destinazione coincidono
+   if a1 == a2:
+       return [a1], 0
+   # Esploro i successori del nodo sorgente.
+   # In un grafo orientato considero solo gli archi uscenti da a1.
+   for v in self._grafo.successors(a1):
+       if v not in parziale:
+           parziale.append(v)
+           # Avvio la ricorsione dal cammino [a1, v]
+           self.ricorsione(parziale)
+           # Backtracking
+           parziale.pop()
+
+
+   return self._bestPath, self._costoCammino
+
+
+def ricorsione(self, parziale):
+   """
+   Metodo ricorsivo per cercare il cammino da sorgente a destinazione
+   con costo totale minimo.
+   Il grafo è orientato, quindi vengono esplorati solo i successori
+   del nodo corrente.
+   """
+
+
+   # Recupero l'ultimo nodo inserito nel cammino parziale
+   nodo_corrente = parziale[-1]
+
+
+   # Calcolo il costo attuale del cammino parziale
+   costo_attuale = self.score(parziale)
+
+
+   # Potatura:
+   # se il costo attuale è già maggiore o uguale al miglior costo trovato,
+   # non ha senso continuare questo ramo.
+   if costo_attuale >= self._costoCammino:
+       return
+
+
+   # Caso base:
+   # se sono arrivato alla destinazione, valuto il cammino trovato.
+   if nodo_corrente == self._destinazione:
+       if costo_attuale < self._costoCammino:
+           self._bestPath = copy.deepcopy(parziale)
+           self._costoCammino = costo_attuale
+
+
+       return
+
+
+   # Esploro solo i successori del nodo corrente
+   for v in self._grafo.successors(nodo_corrente):
+       # Evito cicli nel cammino
+       if v not in parziale:
+           parziale.append(v)
+           self.ricorsione(parziale)
+           parziale.pop()
+
+
+###################################################################################
+Selezionare il numero massimo di anni e il numero di ore per cui analizzare.
+Selezionare il sottoinsieme di eventi che si sono verificati in un
+massimo di X anni, per un totale di Y ore massimo, tale da massimizzare
+il numero totale di persone coinvolte.
+In particolare, l’applicazione deve rispettare i seguenti vincoli:
+- Quando si aggiunge un evento alla lista di eventi selezionati, bisogna considerare tutte
+le ore di disservizio relative all’evento considerato. Il numero di ore di disservizio viene calcolato
+come la differenza tra date_event_began e date_event_finished
+- Il numero totale di ore di disservizio del sottoinsieme di eventi selezionati deve essere sempre
+minore o uguale del valore Y inserito dall’utente nell’interfaccia grafica
+- La differenza tra l’anno dell’evento più recente e l’anno di quello più vecchio deve essere sempre
+minore o uguale del numero di anni X inserito dall’utente nell’interfaccia grafica.
+####################################################################################
+def worstCase(self, nerc, maxY, maxH):
+
+
+   # Carico tutti gli eventi di blackout relativi alla zona NERC selezionata.
+   # Si assume che gli eventi siano restituiti già ordinati cronologicamente.
+   self.loadEvents(nerc)
+
+
+   # Inizializzo la soluzione parziale vuota.
+   # Questa lista conterrà temporaneamente gli eventi scelti durante la ricorsione.
+   parziale = []
+
+
+   # Avvio la ricorsione partendo dalla posizione 0 della lista degli eventi.
+   self.ricorsione(parziale, maxY, maxH, 0)
+
+
+   # Stampo la migliore soluzione trovata.
+   return self._solBest
+
+
+
+
+def ricorsione(self, parziale, maxY, maxH, pos):
+   # Caso di terminazione / potatura.
+   # Se la durata totale degli eventi selezionati supera il massimo numero
+   # di ore consentito, interrompo questo ramo della ricorsione.
+   if self.sumDurata(parziale) / 60 / 60 > maxH:
+       return
+
+
+   # Verifico se la soluzione parziale corrente è migliore della migliore
+   # soluzione trovata finora.
+   # Il confronto viene fatto sul numero totale di clienti coinvolti.
+   if self.countCustomers(parziale) > self._clientiMaxBest:
+       # Salvo una copia della soluzione parziale corrente.
+       # Uso [:] per evitare che successive modifiche a parziale
+
+
+       # modifichino anche la soluzione migliore salvata.
+       self._solBest = parziale[:]
+       # Aggiorno il massimo numero di clienti coinvolti.
+       self._clientiMaxBest = self.countCustomers(parziale)
+
+
+   # Inizializzo l'indice da cui continuare la ricerca.
+   i = pos
+
+
+   # Scorro tutti gli eventi a partire dalla posizione pos.
+   # In questo modo evito di generare più volte le stesse combinazioni.
+   for e in self._listEvents[pos:]:
+
+
+       # Aggiungo l'evento corrente alla soluzione parziale.
+       parziale.append(e)
+
+
+       # Controllo il vincolo sul numero massimo di anni.
+       # Se il range temporale tra evento più vecchio e più recente
+       # supera maxY, rimuovo l'evento appena aggiunto e interrompo il ramo.
+       if self.getRangeAnni(parziale) > maxY:
+           parziale.remove(e)
+           return
+       # Incremento l'indice, così la prossima chiamata ricorsiva
+       # potrà considerare solo gli eventi successivi.
+       i += 1
+       # Proseguo la ricorsione considerando la soluzione parziale aggiornata.
+       self.ricorsione(parziale, maxY, maxH, i)
+       # Backtracking:
+       # rimuovo l'evento corrente per poter provare altre combinazioni.
+       parziale.remove(e)
+
+
+def getRangeAnni(self, listOutages):
+   # Se ci sono meno di due eventi, il range di anni è nullo.
+   if len(listOutages) < 2:
+       return 0
+   # Recupero la data di inizio del primo evento selezionato.
+   # Poiché gli eventi sono ordinati, questo rappresenta l'evento più vecchio.
+   first = listOutages[0].date_event_began
+   # Recupero la data di fine dell'ultimo evento selezionato.
+   # Poiché gli eventi sono ordinati, questo rappresenta l'evento più recente.
+   last = listOutages[-1].date_event_finished
+
+
+   # Restituisco la differenza tra l'anno dell'evento più recente
+   # e l'anno dell'evento più vecchio.
+   return int(last.year - first.year)
+
+
+
+
+def countCustomers(self, listOutages):
+   # Se la lista è vuota, non ci sono clienti coinvolti.
+   if len(listOutages) == 0:
+       return 0
+   # Inizializzo il contatore dei clienti coinvolti.
+   numCustomers = 0
+   # Sommo i clienti coinvolti da ciascun evento selezionato.
+   for event in listOutages:
+       numCustomers += event.customers_affected
+   # Restituisco il numero totale di clienti coinvolti.
+   return numCustomers
+
+
+
+
+def sumDurata(self, listOutages):
+   # Se la lista è vuota, la durata totale è zero.
+   if len(listOutages) == 0:
+       return 0
+   # Inizializzo la durata totale.
+   sum = 0
+   # Sommo la durata di ciascun evento selezionato.
+   for event in listOutages:
+       sum += self.durata(event)
+   # Restituisco la durata totale in secondi.
+   return sum
+
+
+
+
+def loadEvents(self, nerc):
+   # Carico dal DAO tutti gli eventi relativi alla zona NERC selezionata.
+   self._listEvents = DAO.getAllEvents(nerc)
+
+
+
+
+def loadNerc(self):
+   # Carico dal DAO tutte le possibili zone NERC.
+   self._listNerc = DAO.getAllNerc()
+
+
+
+
+def durata(self, event):
+   # Calcolo la durata dell'evento come differenza tra data di fine
+   # e data di inizio.
+   # Il risultato viene restituito in secondi.
+   return (event.date_event_finished - event.date_event_began).total_seconds()
+
+
+
+
+
+
+###################################################################################
+Sapendo che nel database sono presenti 3 città (Milano, Torino, Genova), supponiamo
+che un tecnico debba compiere delle analisi tecniche della durata di un giorno in
+ciascuna città.
+Le analisi hanno un costo per ogni giornata, determinato dalla  somma di due
+contributi: un fattore costante (di valore 100) ogniqualvolta il tecnico si deve
+spostare da una città ad un’altra in due giorni successivi, ed un fattore
+variabile pari al valore numerico dell’umidità della città nel giorno considerato.
+Si trovi la sequenza delle città da visitare nei primi 15 giorni del mese selezionato,
+tale da minimizzare il costo complessivo rispettando i seguenti vincoli:
+- In nessuna città si possono trascorrere più di 6 giornate (anche non consecutive)
+- Scelta una città, il tecnico non si può spostare prima di aver trascorso 3 giorni
+consecutivi.
+####################################################################################
+def get_sequenza_ottima(self, mese):
+       self.__sequenza_ottima = []
+       self.__costo_ottimo = -1
+       self.__ricorsione_sequenza([], 0, self.get_situazioni_meta_mese(mese))
+       return self.__sequenza_ottima, self.__costo_ottimo
+
+
+   def __ricorsione_sequenza(self, parziale: list[Situazione], livello: int, situazioni_mese: list[Situazione]):
+       if len(parziale) == 15:
+           costo = self.__calcola_costo(parziale)
+           if costo < self.__costo_ottimo or self.__costo_ottimo == -1:
+               self.__costo_ottimo = costo
+               self.__sequenza_ottima = copy.deepcopy(parziale)
+       else:
+           for i in range(livello * 3, (livello + 1) * 3):
+               if self.__is_admissible(parziale, situazioni_mese[i]):
+                   parziale.append(situazioni_mese[i])
+                   self.__ricorsione_sequenza(parziale, livello + 1, situazioni_mese)
+                   parziale.pop()
+
+
+
+
+   def __calcola_costo(self, sequenza: list[Situazione]) -> int:
+       """Funzione che calcola il costo di una sequenza di situazioni.
+       :param sequenza: la sequenza di situazioni di cui calcolare il costo.
+       :return: il costo della sequenza."""
+       costo = 0
+       # primo giorno
+       costo += sequenza[0].umidita
+       # secondo giorno
+       costo += sequenza[1].umidita
+       if sequenza[0].localita != sequenza[1].localita:
+           costo += 100
+       #altri giorni
+       for i in range(2, len(sequenza)):
+           sequenza_short = sequenza[i-2:i+1]
+           costo += sequenza[i].umidita
+           if sequenza_short[2].localita != sequenza_short[1].localita:
+               costo += 100
+           elif sequenza_short[2].localita != sequenza_short[0].localita:
+               costo += 100
+       return costo
+
+
+   def __is_admissible(self, parziale: list[Situazione], situazione: Situazione) -> bool:
+       """Funzione che verifica se, data una sequenza parziale, una situazione soddisfa i vincoli
+       del problema e puà essere aggiunta.
+       :param parziale: la sequenza parziale.
+       :param situazione: la situazione di cui verificare l'ammissibilità"""
+       #check che nessuna citta sia visitata piu' di 6 volte
+       visite = {"Milano": 0, "Genova": 0, "Torino": 0}
+       if len(parziale) >= 6:
+           for stop in parziale:
+               visite[stop.localita] += 1
+           visite[situazione.localita] += 1
+
+
+           # print(list(visite.values())>6)
+           # for visita in visite.values():
+           #     if visita > 6:
+           #         return False
+           if any(v > 6 for v in visite.values()):
+               return False
+
+
+       # check che il tecnico non si sposti prima di aver trascorso 3 giorni consecutivi nella stessa
+       # citta
+       if len(parziale) >= 3:
+           last_stop = parziale[-1].localita
+           permanenza = 0
+           for stop in parziale[-3:]:
+               if stop.localita == last_stop:
+                   permanenza += 1
+           if permanenza < 3 and situazione.localita != last_stop:
+               return False
+           else:
+               return True
+       else:
+           for stop in parziale:
+               if stop.localita != situazione.localita:
+                   return False
+           return True
+
+
+###################################################################################
+Cammino con peso massimo presente nel grafo, senza dare un nodo di partenza
+####################################################################################
+   def getPesoArco(self, u, v):
+       return self._grafo[u][v]["weight"]
+
+
+   def score(self, parziale):
+       score = 0
+       for i in range (len(parziale) -1):
+           score += self._grafo[parziale[i]][parziale[i+1]]["weight"]
+       return score
+
+
+   def getPath(self):
+       #Inizializzo le variabili generiche
+       self._bestPath = []
+       self._costoCammino = -1
+
+
+       #Esploriamo i vicini del nodo di partenza v0
+       #Con grafo diretto --> successors()
+       #Con grafo non diretto --> neighbors
+       #senza nodo sorgente conosciuto ciclo direttamente su uno dei nodi del grafo
+       for v in self._grafo.nodes:
+           parziale = [v] #Creo ad ogni ciclo una lista nuova che inizia da un qualsiasi nodo sorgente v
+           #Avvio la ricorsione
+           self.ricorsione(parziale)
+           #Effettuo il meccanismo di backtracking: rimuoviamo il vicino per trovare le altre strade del ciclo
+       return self._bestPath , self._costoCammino
+
+
+
+
+   def ricorsione(self, parziale):
+       #Verifico se la soluzione parziale è meglio del BestCase utilizzando la funzione score
+       punteggio_attuale = self.score(parziale)
+       if punteggio_attuale > self._costoCammino:
+           self._bestPath = copy.deepcopy(parziale)
+           self._costoCammino = punteggio_attuale
+
+
+       #Verifico quindi se ha senso continuare ad andare avanti con la ricerca di un cammino ottimale - Nel caso ci
+       #fossero vincoli di terminazione
+
+
+       #Effettuo quindi il mio meccanismo di ricorsione per lavorare sul nodo successivo
+       nodo_corrente = parziale[-1]
+       #Recupero i vicini dell'ultimo modo inserito all'interno della mia lista parziale
+       for v in self._grafo.neighbors(nodo_corrente):
+           if v not in parziale:
+               #verifico che il peso del potenziale arco che andremo ad aggiungere sia maggiore del precedente
+               if v.date_of_birth > nodo_corrente.date_of_birth:
+                   parziale.append(v)
+                   self.ricorsione(parziale)
+                   parziale.pop()
+
